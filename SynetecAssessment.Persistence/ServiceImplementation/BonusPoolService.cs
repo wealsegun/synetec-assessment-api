@@ -1,14 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SynetecAssessmentApi.Domain;
-using SynetecAssessmentApi.Dtos;
-using SynetecAssessmentApi.Persistence;
+using SynetecAssessmentApi.Domain.DTO;
+using SynetecAssessmentApi.Persistence.LogicInterface;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace SynetecAssessmentApi.Services
+namespace SynetecAssessmentApi.Persistence
 {
-    public class BonusPoolService
+    public class BonusPoolService : IBonusPoolService
     {
         private readonly AppDbContext _dbContext;
 
@@ -28,12 +30,12 @@ namespace SynetecAssessmentApi.Services
                 .ToListAsync();
 
             List<EmployeeDto> result = new List<EmployeeDto>();
-
             foreach (var employee in employees)
             {
                 result.Add(
                     new EmployeeDto
                     {
+                        EmployeeId = employee.Id,
                         Fullname = employee.Fullname,
                         JobTitle = employee.JobTitle,
                         Salary = employee.Salary,
@@ -55,29 +57,40 @@ namespace SynetecAssessmentApi.Services
                 .Include(e => e.Department)
                 .FirstOrDefaultAsync(item => item.Id == selectedEmployeeId);
 
-            //get the total salary budget for the company
-            int totalSalary = (int)_dbContext.Employees.Sum(item => item.Salary);
-
-            //calculate the bonus allocation for the employee
-            decimal bonusPercentage = (decimal)employee.Salary / (decimal)totalSalary;
-            int bonusAllocation = (int)(bonusPercentage * bonusPoolAmount);
-
-            return new BonusPoolCalculatorResultDto
+            //Check If Employee details exist
+            if (employee != null)
             {
-                Employee = new EmployeeDto
-                {
-                    Fullname = employee.Fullname,
-                    JobTitle = employee.JobTitle,
-                    Salary = employee.Salary,
-                    Department = new DepartmentDto
-                    {
-                        Title = employee.Department.Title,
-                        Description = employee.Department.Description
-                    }
-                },
+                //get the total salary budget for the company
+                int totalSalary = (int)_dbContext.Employees.Sum(item => item.Salary);
 
-                Amount = bonusAllocation
-            };
+                //calculate the bonus allocation for the employee
+                decimal bonusPercentage = (decimal)employee.Salary / (decimal)totalSalary;
+                int bonusAllocation = (int)(bonusPercentage * bonusPoolAmount);
+                return new BonusPoolCalculatorResultDto
+                {
+                    Employee = new EmployeeDto
+                    {
+                        Fullname = employee.Fullname,
+                        JobTitle = employee.JobTitle,
+                        Salary = employee.Salary,
+                        EmployeeId = employee.Id,
+                        Department = new DepartmentDto
+                        {
+                            Title = employee.Department.Title,
+                            Description = employee.Department.Description
+                        }
+                    },
+
+                    Amount = bonusAllocation
+                };
+            }
+            else
+            {
+                return null;
+            }
+
+
+
         }
     }
 }
