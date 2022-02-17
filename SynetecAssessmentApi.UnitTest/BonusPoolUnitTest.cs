@@ -27,9 +27,6 @@ namespace SynetecAssessmentApi.UnitTest
         [TestInitialize]
         public void Initialize()
         {
-
-
-
             Services = new ServiceCollection();
 
             Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase(databaseName: "HrDb"),
@@ -43,7 +40,6 @@ namespace SynetecAssessmentApi.UnitTest
             var _serviceProf = scope.ServiceProvider;
 
             DbContextGenerator.Initialize(_serviceProf);
-
         }
         [TestMethod]
         public void GetEmployeesAsync()
