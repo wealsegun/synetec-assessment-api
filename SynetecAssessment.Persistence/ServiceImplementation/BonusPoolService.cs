@@ -20,6 +20,7 @@ namespace SynetecAssessmentApi.Persistence
             dbContextOptionBuilder.UseInMemoryDatabase(databaseName: "HrDb");
 
             _dbContext = new AppDbContext(dbContextOptionBuilder.Options);
+            
         }
 
         public async Task<IEnumerable<EmployeeDto>> GetEmployeesAsync()
@@ -41,6 +42,7 @@ namespace SynetecAssessmentApi.Persistence
                         Salary = employee.Salary,
                         Department = new DepartmentDto
                         {
+                            Id = employee.DepartmentId,
                             Title = employee.Department.Title,
                             Description = employee.Department.Description
                         }
@@ -76,6 +78,7 @@ namespace SynetecAssessmentApi.Persistence
                         EmployeeId = employee.Id,
                         Department = new DepartmentDto
                         {
+                            Id = employee.DepartmentId,
                             Title = employee.Department.Title,
                             Description = employee.Department.Description
                         }

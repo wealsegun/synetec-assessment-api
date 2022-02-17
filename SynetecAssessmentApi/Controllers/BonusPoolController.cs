@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using SynetecAssessmentApi.Domain.DTO;
+using SynetecAssessmentApi.MappedModels;
 using SynetecAssessmentApi.Persistence.LogicInterface;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SynetecAssessmentApi.Controllers
@@ -10,16 +13,18 @@ namespace SynetecAssessmentApi.Controllers
     public class BonusPoolController : Controller
     {
         private readonly IBonusPoolService _bonusPool;
-        public BonusPoolController(IBonusPoolService bonusPool)
+        private readonly IMapper _mapper;
+        public BonusPoolController(IBonusPoolService bonusPool, IMapper mapper)
         {
             _bonusPool = bonusPool;
+            _mapper = mapper;
         }
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             try
             {
-                var Response = await Task.Run(() => _bonusPool.GetEmployeesAsync());
+                var Response = _mapper.Map<List<EmployeeViewModel>>( await Task.Run(() => _bonusPool.GetEmployeesAsync()));
                 return Ok(Response);
             }
             catch (Exception ex)
@@ -29,14 +34,15 @@ namespace SynetecAssessmentApi.Controllers
         }
 
         [HttpPost()]
-        public async Task<IActionResult> CalculateBonus([FromBody] CalculateBonusDto request)
+        public async Task<IActionResult> CalculateBonus([FromBody] CalculateBonusParseModel model)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    var Response = await Task.Run(() => _bonusPool.CalculateAsync(request.TotalBonusPoolAmount,
-               request.SelectedEmployeeId));
+                    var request = _mapper.Map<CalculateBonusDto>(model);
+                    var Response =_mapper.Map<BonusPoolCalculatorResultViewModel>( await Task.Run(() => _bonusPool.CalculateAsync(request.TotalBonusPoolAmount,
+               request.SelectedEmployeeId)));
                     if (Response != null)
                     {
                         return Ok(Response);

@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using SynetecAssessmentApi.MappedModels;
 using SynetecAssessmentApi.Persistence;
 using SynetecAssessmentApi.Persistence.LogicInterface;
 
@@ -33,6 +35,16 @@ namespace SynetecAssessmentApi
 
             //Resolve Services to Interfaces
             services.AddSingleton<IBonusPoolService, BonusPoolService>();
+
+
+            // Auto Mapper Configurations
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappedProfile());
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
